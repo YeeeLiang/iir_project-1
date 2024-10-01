@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生醫資訊擷取技術 Project 1 </title>
+    <title>生醫資訊擷取技術 Project 1</title>
     <style>
         #fullText {
             border: 1px solid #ccc;
@@ -22,10 +22,22 @@
             font-size: 1.5em;
             margin: 0;
         }
+        .text-container {
+            float: left; /* 使元素浮動，從左到右排列 */
+            width: calc(33.33% - 20px); /* 每行顯示三個，並留出一些邊距 */
+            margin: 10px; /* 添加邊距以增加間距 */
+            vertical-align: top; /* 垂直對齊 */
+            box-sizing: border-box; /* 包含邊距和邊框在內的寬度計算 */
+        }
+        /* 清除浮動 */
+        #fullText::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
     </style>
 </head>
 <body>
-    <h1>上傳 XML 文件</h1>
     <h1>{{ title }}</h1>
     <form id="uploadForm" method="POST" enctype="multipart/form-data">
         <input type="file" name="files" accept=".xml" multiple required>
@@ -75,7 +87,7 @@
 
                 const label = document.createElement('label');
                 label.htmlFor = result.filename;
-                label.innerText = `${result.filename} - 字元數: ${result.num_chars}, 字數: ${result.num_words}, 句子數: ${result.num_sentences}`;
+                label.innerText = `${result.filename} - 字元數(含空格): ${result.num_chars_incl_spaces}, 字元數(不含空格): ${result.num_chars_excl_spaces}, 字數: ${result.num_words}, 句子數: ${result.num_sentences}, 非ASCII字元數: ${result.num_non_ascii_chars}, 非ASCII字數: ${result.num_non_ascii_words}`;
 
                 resultsDiv.appendChild(checkbox);
                 resultsDiv.appendChild(label);
@@ -85,14 +97,27 @@
 
         function showFullText() {
             const fullTextDiv = document.getElementById('fullText');
-            fullTextDiv.innerHTML = '';
+            fullTextDiv.innerHTML = ''; // 清空內容
+
             const checkboxes = document.querySelectorAll('#results input[type="checkbox"]:checked');
+
+            // 添加所有選中的文本到 fullTextDiv 中
             checkboxes.forEach(checkbox => {
                 const text = checkbox.value;
                 const title = checkbox.dataset.title;
-                fullTextDiv.innerHTML += `<h3 class="title">${title}</h3><p>${text}</p>`;
+
+                // 創建一個單獨的 .text-container 來包裝每個文件的內容
+                const container = document.createElement('div');
+                container.classList.add('text-container');
+
+                // 添加標題和文本到容器中
+                container.innerHTML = `<h3 class="title">${title}</h3><p>${text}</p>`;
+                
+                // 將這個容器添加到 fullTextDiv 中
+                fullTextDiv.appendChild(container);
             });
-            highlightKeyword();
+
+            highlightKeyword(); // 呼叫高亮顯示關鍵字的函數
         }
 
         document.getElementById('keyword').oninput = highlightKeyword;
